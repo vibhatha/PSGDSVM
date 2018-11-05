@@ -36,7 +36,7 @@ public class DataSet {
         this.ratio = ratio;
         this.isSplit = isSplit;
     }
-
+    // TODO:  deal with exception throwing from I/O
     public void load() {
         if(this.isSplit == false) {
             CsvFile csvFile = new CsvFile(this.sourceFile, "csv");

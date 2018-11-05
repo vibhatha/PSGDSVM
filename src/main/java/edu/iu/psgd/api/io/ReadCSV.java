@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class ReadCSV {
+
+    private static final Logger LOG = Logger.getLogger(ReadCSV.class.getName());
 
     private CsvFile csvFile;
     private ArrayList<double[]> xVals = new ArrayList<>();
@@ -36,6 +39,7 @@ public class ReadCSV {
         String line = "";
         String cvsSplitBy = ",";
 
+
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
 
             while ((line = br.readLine()) != null) {
@@ -56,7 +60,8 @@ public class ReadCSV {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.info(String.format("CSV File path :%s \n ",csvFile));
+            LOG.info("IOException : " + e.getMessage());
         }
     }
 
@@ -76,7 +81,7 @@ public class ReadCSV {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.info("IOException : " + e.getMessage());
         }
 
     }

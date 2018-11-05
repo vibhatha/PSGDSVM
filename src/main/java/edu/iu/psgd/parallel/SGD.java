@@ -1,5 +1,6 @@
 package edu.iu.psgd.parallel;
 
+import edu.iu.psgd.exceptions.MatrixMultiplicationException;
 import edu.iu.psgd.exceptions.NullDataSetException;
 
 public abstract class SGD {
@@ -12,6 +13,9 @@ public abstract class SGD {
     protected boolean isInvalid = false;
     protected double [] w;
     protected int iterations = 100;
+    protected long trainingTime = 0;
+    protected long testingTime = 0;
+    protected long dataLoadingTime = 0;
 
     public SGD (double[][] X, double[] y, double alpha, int iterations) {
         this.X = X;
@@ -35,7 +39,7 @@ public abstract class SGD {
 
     }
 
-    public abstract void sgd() throws NullDataSetException;
+    public abstract void sgd() throws NullDataSetException, MatrixMultiplicationException;
 
 
 }

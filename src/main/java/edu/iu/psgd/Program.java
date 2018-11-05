@@ -1,8 +1,9 @@
 package edu.iu.psgd;
 
 import edu.iu.psgd.api.data.DataSet;
+import edu.iu.psgd.exceptions.MatrixMultiplicationException;
 import edu.iu.psgd.exceptions.NullDataSetException;
-import edu.iu.psgd.parallel.PegasosSGD;
+import edu.iu.psgd.parallel.svm.pegasos.PegasosSGD;
 import edu.iu.psgd.resource.ResourceManager;
 import edu.iu.psgd.util.OptArgs;
 import edu.iu.psgd.util.Params;
@@ -14,7 +15,7 @@ public class Program {
 
     private static final Logger LOG = Logger.getLogger(Program.class.getName());
 
-    public static void main(String[] args) throws NullDataSetException, ParseException {
+    public static void main(String[] args) throws NullDataSetException, ParseException, MatrixMultiplicationException {
 
 //        String dataset = "a9a";
 //        String basePath = "/home/vibhatha/";
@@ -31,9 +32,16 @@ public class Program {
         OptArgs optArgs = new OptArgs(args);
         optArgs.getArgs();
         Params params = optArgs.getParams();
-        ResourceManager resourceManager = new ResourceManager();
+        ResourceManager resourceManager = new ResourceManager(params);
+        DataSet dataSet = resourceManager.load();
+        double [][] X = dataSet.getX();
+        double [] y = dataSet.getY();
+        PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
+        pegasosSGD.sgd();
 
-        resourceManager.getBasePath();
+
+
+
 
 
     }
