@@ -1,2 +1,2 @@
 # PSGDSVM
-PSGD Svm
+PSGD SVM

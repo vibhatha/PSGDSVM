@@ -1,6 +1,9 @@
 package edu.iu.psgd.api.data;
 
 
+import edu.iu.psgd.api.io.CsvFile;
+import edu.iu.psgd.api.io.ReadCSV;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -13,6 +16,8 @@ public class DataSet {
     private int datasize=1;
     private double ratio=1.0;
     private boolean isSplit=false;
+    private double [][] X;
+    private double [] y;
 
     public DataSet(String sourceFile) {
         this.sourceFile = sourceFile;
@@ -38,7 +43,16 @@ public class DataSet {
             ReadCSV readCSV = new ReadCSV(csvFile);
             readCSV.readX();
             ArrayList<double[]> xvals =  readCSV.getxVals();
-            LOG.info(String.format("Data Samples %d ", xvals.size()));
+            int samples = xvals.size();
+            X = new double[samples][this.features];
+            y = new double[samples];
+            for (int i = 0; i < samples; i++) {
+                double [] row = xvals.get(i);
+                y[i] = row[0];
+                for (int j = 1; j < row.length; j++) {
+                    X[i][j-1] = row[j-1];
+                }
+            }
         }
 
         if(this.isSplit == true) {
@@ -47,4 +61,11 @@ public class DataSet {
 
     }
 
+    public double[][] getX() {
+        return X;
+    }
+
+    public double[] getY() {
+        return y;
+    }
 }
