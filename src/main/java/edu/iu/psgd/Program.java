@@ -3,6 +3,7 @@ package edu.iu.psgd;
 import edu.iu.psgd.api.data.DataSet;
 import edu.iu.psgd.exceptions.MatrixMultiplicationException;
 import edu.iu.psgd.exceptions.NullDataSetException;
+import edu.iu.psgd.math.Matrix;
 import edu.iu.psgd.parallel.svm.pegasos.PegasosSGD;
 import edu.iu.psgd.resource.ResourceManager;
 import edu.iu.psgd.util.OptArgs;
@@ -35,7 +36,11 @@ public class Program {
         ResourceManager resourceManager = new ResourceManager(params);
         DataSet dataSet = resourceManager.load();
         double [][] X = dataSet.getX();
+        //Matrix.printMatrix(X);
         double [] y = dataSet.getY();
+        double [][] yp = new double [1][params.getFeatures()];
+        yp[0] = y;
+        //Matrix.printMatrix(yp);
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.sgd();
 

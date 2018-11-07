@@ -26,14 +26,20 @@ public class PegasosSGD extends SGD {
         trainingTime -= System.currentTimeMillis();
         int features = X[0].length;
         w = Initializer.initialWeights(features);
+
         for(int epoch=0; epoch<iterations; epoch++) {
+            if(epoch % 10 == 0) {
+                //LOG.info(String.format("Epoch %d/%d", epoch, iterations));
+            }
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
                 double condition = yi * Matrix.dot(xi,w);
+                System.out.println(condition);
+
                 if(condition < 1) {
                     double [] Xyia = new double[X.length];
-                    Xyia = Matrix.scalarMultiply(Matrix.scalarMultiply(xi, yi), alpha);
+                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w,Matrix.scalarMultiply(xi, yi)), alpha);
                     w = Matrix.subtract(w, Xyia);
                 } else {
                     double [] wa = new double[w.length];
@@ -42,7 +48,10 @@ public class PegasosSGD extends SGD {
                 }
             }
         }
+        Matrix.printVector(w);
         trainingTime += System.currentTimeMillis();
-        trainingTime /= 1000;
+        trainingTime /= 1000.0;
+        LOG.info(String.format("Training Time  %s s", Long.toString(trainingTime)));
+
     }
 }

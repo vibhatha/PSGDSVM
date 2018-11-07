@@ -5,6 +5,7 @@ import edu.iu.psgd.api.io.CsvFile;
 import edu.iu.psgd.api.io.ReadCSV;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 public class DataSet {
@@ -43,6 +44,7 @@ public class DataSet {
             ReadCSV readCSV = new ReadCSV(csvFile);
             readCSV.readX();
             ArrayList<double[]> xvals =  readCSV.getxVals();
+            Collections.shuffle(xvals);
             int samples = xvals.size();
             X = new double[samples][this.features];
             y = new double[samples];
@@ -50,7 +52,7 @@ public class DataSet {
                 double [] row = xvals.get(i);
                 y[i] = row[0];
                 for (int j = 1; j < row.length; j++) {
-                    X[i][j-1] = row[j-1];
+                    X[i][j-1] = row[j];
                 }
             }
         }

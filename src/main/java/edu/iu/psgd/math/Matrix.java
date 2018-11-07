@@ -63,4 +63,21 @@ public class Matrix {
                     + X.length + ", w.length : " + w.length );
         }
     }
+
+    public static void printVector(double [] mat) {
+        for (int i = 0; i < mat.length; i++) {
+            System.out.print(mat[i]+" ");
+        }
+        System.out.println();
+    }
+
+    public static void printMatrix(double [][] mat) {
+        for (int i = 0; i < mat.length; i++) {
+            for (int j = 0; j < mat[0].length; j++) {
+                System.out.print(mat[i][j]+" ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
 }
