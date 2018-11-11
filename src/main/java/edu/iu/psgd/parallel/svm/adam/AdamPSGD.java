@@ -39,6 +39,7 @@ public class AdamPSGD extends SGD {
         int start = world_rank * dataPerMachine;
         int end = start + dataPerMachine;
         int totalVisibleSamples = dataPerMachine * world_size;
+        System.out.println(String.format("Total Samples : %d, Data Per Machine %d, Start : %d, End : %d", totalVisibleSamples, dataPerMachine, start, end));
         w = Initializer.initialWeights(features);
         double [] v = Initializer.initZeros(features);
         double [] r = Initializer.initZeros(features);
@@ -92,6 +93,6 @@ public class AdamPSGD extends SGD {
         //Matrix.printVector(w);
         trainingTime += System.currentTimeMillis();
         trainingTime /= 1000.0;
-        System.out.println((String.format("Training Time  %s s", Long.toString(trainingTime))));
+        //System.out.println((String.format("Training Time  %s s", Long.toString(trainingTime))));
     }
 }
