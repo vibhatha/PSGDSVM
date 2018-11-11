@@ -82,6 +82,13 @@ public class ResourceManager {
             dataSet.load();
         }
 
+        if(params.isSplit()) {
+            String datasourceBasePath = this.getBasePath();
+            String dataFileTrain = datasourceBasePath + params.getDataset() + "/training.csv";
+            dataSet = new DataSet(dataFileTrain, params.getFeatures(), params.getTrainingSamples());
+            dataSet.load();
+        }
+
 
         return dataSet;
     }

@@ -32,6 +32,7 @@ public class DataSet {
         this.sourceFile = sourceFile;
         this.features = features;
         this.datasize = datasize;
+        this.isSplit = true;
     }
 
     public DataSet(String sourceFile, int features, int datasize, double ratio, boolean isSplit) {
@@ -87,7 +88,21 @@ public class DataSet {
         }
 
         if(this.isSplit == true) {
-
+            CsvFile csvFile = new CsvFile(this.sourceFile, "csv");
+            ReadCSV readCSV = new ReadCSV(csvFile);
+            readCSV.readX();
+            ArrayList<double[]> xvals =  readCSV.getxVals();
+            Collections.shuffle(xvals);
+            int samples = xvals.size();
+            Xtrain = new double[samples][this.features];
+            ytrain = new double[samples];
+            for (int i = 0; i < samples; i++) {
+                double [] row = xvals.get(i);
+                ytrain[i] = row[0];
+                for (int j = 1; j < row.length; j++) {
+                    Xtrain[i][j-1] = row[j];
+                }
+            }
         }
 
     }
