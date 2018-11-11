@@ -71,12 +71,17 @@ public class ResourceManager {
 
     public DataSet load() {
         this.dataSet = null;
-        String datasourceBasePath = this.getBasePath();
-        LOG.info("Datasource Base Path : " + datasourceBasePath);
-        String dataFile = datasourceBasePath + params.getDataset() + "/training.csv";
-        LOG.info("DataSource Path : " + dataFile);
-        dataSet = new DataSet(dataFile, params.getFeatures(), params.getTrainingSamples());
-        dataSet.load();
+        if(!params.isSplit()) {
+            String datasourceBasePath = this.getBasePath();
+            //LOG.info("Datasource Base Path : " + datasourceBasePath);
+            String dataFileTrain = datasourceBasePath + params.getDataset() + "/training.csv";
+            String dataFileTest = datasourceBasePath + params.getDataset() + "/testing.csv";
+            //LOG.info("Data Train file Path : " + dataFileTrain);
+            //LOG.info("Data Test file Path : " + dataFileTest);
+            dataSet = new DataSet(params.getFeatures(), dataFileTrain, dataFileTest);
+            dataSet.load();
+        }
+
 
         return dataSet;
     }

@@ -12,7 +12,23 @@ public class Matrix {
         return result;
     }
 
-    public static double [] inner(double [] X, double [] w) throws MatrixMultiplicationException {
+    public static double[] scalarDivide(double [] X, double y) {
+        double [] result = new double [X.length];
+        for (int i = 0; i < X.length; i++) {
+            result[i] = X[i] / y;
+        }
+        return result;
+    }
+
+    public static double[] scalarAddition(double [] X, double y) {
+        double [] result = new double [X.length];
+        for (int i = 0; i < X.length; i++) {
+            result[i] = X[i] + y;
+        }
+        return result;
+    }
+
+    public static double [] multiply(double [] X, double [] w) throws MatrixMultiplicationException {
         if(X.length == w.length) {
             double [] result = new double[X.length];
             for (int i = 0; i < X.length; i++) {
@@ -22,6 +38,32 @@ public class Matrix {
         }else {
             throw new MatrixMultiplicationException("Invalid Dimensions X.length "
                     + X.length + ", w.length : " + w.length );
+        }
+    }
+
+    public static double [] divide(double [] X, double [] w) throws MatrixMultiplicationException {
+        if(X.length == w.length) {
+            double [] result = new double[X.length];
+            for (int i = 0; i < X.length; i++) {
+                result[i] = X[i] / w[i];
+            }
+            return result;
+        }else {
+            throw new MatrixMultiplicationException("Invalid Dimensions X.length "
+                    + X.length + ", w.length : " + w.length );
+        }
+    }
+
+    public static double [] sqrt(double [] X) throws MatrixMultiplicationException {
+        if(X.length > 0) {
+            double [] result = new double[X.length];
+            for (int i = 0; i < X.length; i++) {
+                result[i] = Math.sqrt(X[i]);
+            }
+            return result;
+        }else {
+            throw new MatrixMultiplicationException("Invalid Dimensions X.length "
+                    + X.length );
         }
     }
 
@@ -63,6 +105,9 @@ public class Matrix {
                     + X.length + ", w.length : " + w.length );
         }
     }
+
+
+
 
     public static void printVector(double [] mat) {
         for (int i = 0; i < mat.length; i++) {

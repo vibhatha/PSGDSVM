@@ -29,13 +29,13 @@ public class PegasosSGD extends SGD {
 
         for(int epoch=0; epoch<iterations; epoch++) {
             if(epoch % 10 == 0) {
-                //LOG.info(String.format("Epoch %d/%d", epoch, iterations));
+                System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
             }
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
                 double condition = yi * Matrix.dot(xi,w);
-                System.out.println(condition);
+                //System.out.println(condition);
 
                 if(condition < 1) {
                     double [] Xyia = new double[X.length];
