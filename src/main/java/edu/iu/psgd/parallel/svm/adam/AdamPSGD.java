@@ -57,7 +57,9 @@ public class AdamPSGD extends SGD {
 
         for(int epoch=1; epoch<iterations; epoch++) {
             if(epoch % 10 == 0) {
-                //System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+                if(world_rank==0) {
+                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+                }
             }
             for (int i = start; i < end; i++) {
                 double [] xi = X[i];
