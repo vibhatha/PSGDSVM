@@ -83,6 +83,7 @@ public class ResourceManager {
         }
 
         if(params.isSplit()) {
+            System.out.println("Splitting Data ...");
             String datasourceBasePath = this.getBasePath();
             String dataFileTrain = datasourceBasePath + params.getDataset() + "/training.csv";
             dataSet = new DataSet(dataFileTrain, params.getFeatures(), params.getTrainingSamples());
