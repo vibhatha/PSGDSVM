@@ -5,19 +5,23 @@ import edu.iu.psgd.exceptions.NullDataSetException;
 import edu.iu.psgd.math.Initializer;
 import edu.iu.psgd.math.Matrix;
 import edu.iu.psgd.parallel.SGD;
+import mpi.MPI;
+import mpi.MPIException;
 
 import java.util.logging.Logger;
 
-public class AdamSGD extends SGD {
-
-    private static final Logger LOG = Logger.getLogger(AdamSGD.class.getName());
+public class AdamPSGD extends SGD {
+    private static final Logger LOG = Logger.getLogger(AdamPSGD.class.getName());
     private double beta1 = 0.93;
     private double beta2 = 0.999;
-
-    public AdamSGD(double[][] X, double[] y, double alpha, int iterations, double beta1, double beta2) {
+    private int world_size = 4;
+    private int world_rank = 0;
+    public AdamPSGD(double[][] X, double[] y, double alpha, int iterations, double beta1, double beta2, int world_size, int world_rank) {
         super(X, y, alpha, iterations);
         this.beta1 = beta1;
         this.beta2 = beta2;
+        this.world_size = world_size;
+        this.world_rank = world_rank;
     }
 
     @Override
@@ -30,6 +34,11 @@ public class AdamSGD extends SGD {
         System.out.println(String.format("Beta1 %f , Beta2 %f ", beta1, beta2));
         trainingTime -= System.currentTimeMillis();
         int features = X[0].length;
+        int totalSamples = X.length;
+        int dataPerMachine = totalSamples/world_size;
+        int start = world_rank * dataPerMachine;
+        int end = start + dataPerMachine;
+        int totalVisibleSamples = dataPerMachine * world_size;
         w = Initializer.initialWeights(features);
         double [] v = Initializer.initZeros(features);
         double [] r = Initializer.initZeros(features);
@@ -43,12 +52,13 @@ public class AdamSGD extends SGD {
         double [] gradient = Initializer.initZeros(features);
         double [] w1 = Initializer.initZeros(features);
         double [] w2 = Initializer.initZeros(features);
+        double [] globalW = Initializer.initZeros(features);
 
         for(int epoch=1; epoch<iterations; epoch++) {
             if(epoch % 10 == 0) {
                 //System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
             }
-            for (int i = 0; i < X.length; i++) {
+            for (int i = start; i < end; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
                 double condition = yi * Matrix.dot(xi,w);
@@ -71,6 +81,12 @@ public class AdamSGD extends SGD {
                 w1 = Matrix.scalarAddition(Matrix.sqrt(r_hat), epsilon);
                 w2 = Matrix.divide(v_hat, w1);
                 w = Matrix.subtract(w, Matrix.scalarMultiply(w2, alpha));
+                try {
+                    MPI.COMM_WORLD.allReduce(w, globalW, w.length, MPI.DOUBLE, MPI.SUM);
+                } catch (MPIException e) {
+                    System.out.println("Exception : " + e.getMessage());
+                }
+                w = Matrix.scalarDivide(globalW, world_size);
             }
         }
         //Matrix.printVector(w);
@@ -78,7 +94,4 @@ public class AdamSGD extends SGD {
         trainingTime /= 1000.0;
         System.out.println((String.format("Training Time  %s s", Long.toString(trainingTime))));
     }
-
-
-
 }

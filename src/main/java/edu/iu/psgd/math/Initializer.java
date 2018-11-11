@@ -8,7 +8,7 @@ public class Initializer {
         double [] initW = new double[size];
         Random random = new Random();
         for (int i = 0; i < size; i++) {
-            initW[i] = random.nextGaussian()*0.001;
+            initW[i] = random.nextGaussian();
         }
 
         return initW;
