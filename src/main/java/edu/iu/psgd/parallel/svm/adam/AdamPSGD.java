@@ -33,13 +33,6 @@ public class AdamPSGD extends SGD {
         }
         System.out.println(String.format("Beta1 %f , Beta2 %f ", beta1, beta2));
         trainingTime -= System.currentTimeMillis();
-        int features = X[0].length;
-        int totalSamples = X.length;
-        int dataPerMachine = totalSamples/world_size;
-        int start = world_rank * dataPerMachine;
-        int end = start + dataPerMachine;
-        int totalVisibleSamples = dataPerMachine * world_size;
-        System.out.println(String.format("Total Samples : %d, Data Per Machine %d, Start : %d, End : %d", totalVisibleSamples, dataPerMachine, start, end));
         w = Initializer.initialWeights(features);
         double [] v = Initializer.initZeros(features);
         double [] r = Initializer.initZeros(features);
@@ -61,7 +54,7 @@ public class AdamPSGD extends SGD {
                     System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
                 }
             }
-            for (int i = start; i < end; i++) {
+            for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
                 double condition = yi * Matrix.dot(xi,w);

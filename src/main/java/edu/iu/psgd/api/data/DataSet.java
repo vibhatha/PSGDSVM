@@ -2,6 +2,7 @@ package edu.iu.psgd.api.data;
 
 
 import edu.iu.psgd.api.io.CsvFile;
+import edu.iu.psgd.api.io.DistributedReadCSV;
 import edu.iu.psgd.api.io.ReadCSV;
 
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ public class DataSet {
     private double [] ytest;
     private String trainFile;
     private String testFile;
+    private int world_rank;
+    private int world_size;
 
     public DataSet(String sourceFile) {
         this.sourceFile = sourceFile;
@@ -47,6 +50,36 @@ public class DataSet {
         this.features = features;
         this.trainFile = trainFile;
         this.testFile = testFile;
+    }
+
+    public DataSet(String sourceFile, int features, int datasize, double ratio, boolean isSplit, int world_rank, int world_size) {
+        this.sourceFile = sourceFile;
+        this.features = features;
+        this.datasize = datasize;
+        this.ratio = ratio;
+        this.isSplit = isSplit;
+        this.world_rank = world_rank;
+        this.world_size = world_size;
+    }
+
+    public void distributedLoad() {
+        if(this.isSplit==true) {
+            CsvFile csvFile = new CsvFile(this.sourceFile, "csv");
+            DistributedReadCSV distributedReadCSV = new DistributedReadCSV(csvFile, this.world_rank, this.world_size, this.datasize, this.isSplit, this.ratio);
+            distributedReadCSV.read();
+            ArrayList<double[]> xvals =  distributedReadCSV.getxVals();
+            Collections.shuffle(xvals);
+            int samples = xvals.size();
+            Xtrain = new double[samples][this.features];
+            ytrain = new double[samples];
+            for (int i = 0; i < samples; i++) {
+                double [] row = xvals.get(i);
+                ytrain[i] = row[0];
+                for (int j = 1; j < row.length; j++) {
+                    Xtrain[i][j-1] = row[j];
+                }
+            }
+        }
     }
 
     // TODO:  deal with exception throwing from I/O

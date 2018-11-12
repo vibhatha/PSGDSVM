@@ -23,10 +23,35 @@ public class Program {
 
     public static void main(String[] args) throws NullDataSetException, ParseException, MatrixMultiplicationException, MPIException {
 
-        parallelAdam(args);
+        //parallelAdam(args);
         //sequentialAdam(args);
+        parallelAdamDistributedLoad(args);
 
     }
+
+    public static void parallelAdamDistributedLoad(String [] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException {
+        MPI.Init(args);
+        int world_rank = MPI.COMM_WORLD.getRank();
+        int world_size = MPI.COMM_WORLD.getSize();
+        OptArgs optArgs = new OptArgs(args);
+        optArgs.getArgs();
+        Params params = optArgs.getParams();
+        ResourceManager resourceManager = new ResourceManager(params, world_rank, world_size);
+        DataSet dataSet = resourceManager.distributedLoad();
+        double[][] X = dataSet.getXtrain();
+        //Matrix.printMatrix(X);
+        double[] y = dataSet.getYtrain();
+        double startTime = MPI.wtime();
+        AdamPSGD adamPSGD = new AdamPSGD(X, y, 0.01, params.getIterations(), 0.5, 0.5, world_size, world_rank);
+        adamPSGD.sgd();
+        double endTime = MPI.wtime();
+        if(world_rank==0) {
+            System.out.println("Time Taken : " + (endTime-startTime));
+        }
+        MPI.COMM_WORLD.barrier();
+        MPI.Finalize();
+    }
+
 
     public static void parallelAdam(String [] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException {
         MPI.Init(args);

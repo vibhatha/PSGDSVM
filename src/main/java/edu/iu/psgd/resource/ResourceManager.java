@@ -26,11 +26,19 @@ public class ResourceManager {
 
     private Params params;
 
+    private int world_rank;
+
+    private int world_size;
+
     public ResourceManager(Params params) {
         this.params = params;
     }
 
-
+    public ResourceManager(Params params, int world_rank, int world_size) {
+        this.params = params;
+        this.world_rank = world_rank;
+        this.world_size = world_size;
+    }
 
     public String getBasePath() {
         String basePath = "";
@@ -92,5 +100,18 @@ public class ResourceManager {
 
 
         return dataSet;
+    }
+
+    public DataSet distributedLoad() {
+        this.dataSet = null;
+        if(params.isSplit()) {
+            System.out.println("Splitting Data ...");
+            String datasourceBasePath = this.getBasePath();
+            String dataFileTrain = datasourceBasePath + params.getDataset() + "/training.csv";
+            dataSet = new DataSet(dataFileTrain, params.getFeatures(), params.getTrainingSamples(), params.getSplitRatio(), params.isSplit(), this.world_rank, this.world_size);
+            dataSet.distributedLoad();
+        }
+
+        return this.dataSet;
     }
 }
