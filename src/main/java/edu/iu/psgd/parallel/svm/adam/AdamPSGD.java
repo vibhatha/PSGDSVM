@@ -47,14 +47,14 @@ public class AdamPSGD extends SGD {
         double [] w1 = Initializer.initZeros(features);
         double [] w2 = Initializer.initZeros(features);
         double [] globalW = Initializer.initZeros(features);
-
+        System.out.println(String.format("Data Size In Training : %d, rank % d ", X.length, world_rank));
         for(int epoch=1; epoch<iterations; epoch++) {
 //            if(epoch % 10 == 0) {
 //                if(world_rank==0) {
 //                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
 //                }
 //            }
-            System.out.println(String.format("Data Size In Training : %d, rank % d ", X.length, world_rank));
+
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
