@@ -54,6 +54,7 @@ public class AdamPSGD extends SGD {
 //                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
 //                }
 //            }
+            System.out.println(String.format("Data Size In Training : %d, rank % d ", X.length, world_rank));
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];
