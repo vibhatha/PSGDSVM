@@ -49,11 +49,11 @@ public class AdamPSGD extends SGD {
         double [] globalW = Initializer.initZeros(features);
 
         for(int epoch=1; epoch<iterations; epoch++) {
-            if(epoch % 10 == 0) {
-                if(world_rank==0) {
-                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
-                }
-            }
+//            if(epoch % 10 == 0) {
+//                if(world_rank==0) {
+//                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+//                }
+//            }
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
                 double yi = y[i];

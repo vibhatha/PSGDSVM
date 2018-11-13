@@ -31,6 +31,7 @@ public class Program {
 
     public static void parallelAdamDistributedLoad(String [] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException {
         MPI.Init(args);
+
         int world_rank = MPI.COMM_WORLD.getRank();
         int world_size = MPI.COMM_WORLD.getSize();
         OptArgs optArgs = new OptArgs(args);
@@ -55,7 +56,6 @@ public class Program {
 
     public static void parallelAdam(String [] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException {
         MPI.Init(args);
-
         int world_rank = MPI.COMM_WORLD.getRank();
         int world_size = MPI.COMM_WORLD.getSize();
         OptArgs optArgs = new OptArgs(args);
