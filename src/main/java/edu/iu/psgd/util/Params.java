@@ -13,6 +13,7 @@ public class Params {
     private int noOfThreads = 1;
     private int noOfWorkers = 1;
     private double splitRatio = 0.80;
+    private String logSavePath = "";
 
     public Params(String dataset, int iterations, double alpha, String basePath, boolean split, int features,
                   int trainingSamples, int testingSamples, int noOfThreads, int noOfWorkers, double splitRatio) {
@@ -27,6 +28,21 @@ public class Params {
         this.noOfThreads = noOfThreads;
         this.noOfWorkers = noOfWorkers;
         this.splitRatio = splitRatio;
+    }
+
+    public Params(String dataset, int iterations, double alpha, String basePath, boolean split, int features, int trainingSamples, int testingSamples, int noOfThreads, int noOfWorkers, double splitRatio, String logSavePath) {
+        this.dataset = dataset;
+        this.iterations = iterations;
+        this.alpha = alpha;
+        this.basePath = basePath;
+        this.split = split;
+        this.features = features;
+        this.trainingSamples = trainingSamples;
+        this.testingSamples = testingSamples;
+        this.noOfThreads = noOfThreads;
+        this.noOfWorkers = noOfWorkers;
+        this.splitRatio = splitRatio;
+        this.logSavePath = logSavePath;
     }
 
     public String getDataset() {
@@ -116,4 +132,21 @@ public class Params {
     public void setSplitRatio(double splitRatio) {
         this.splitRatio = splitRatio;
     }
+
+    public String getLogSavePath() {
+        return logSavePath;
+    }
+
+    public void setLogSavePath(String logSavePath) {
+        this.logSavePath = logSavePath;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        s = noOfWorkers + "," + dataset + "," + iterations + "," + alpha + "," + features + "," + trainingSamples + "," + noOfThreads + ",";
+        return s;
+    }
+
+
 }

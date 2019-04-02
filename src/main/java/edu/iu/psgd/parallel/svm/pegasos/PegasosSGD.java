@@ -52,6 +52,5 @@ public class PegasosSGD extends SGD {
         trainingTime += System.currentTimeMillis();
         trainingTime /= 1000.0;
         LOG.info(String.format("Training Time  %s s", Long.toString(trainingTime)));
-
     }
 }

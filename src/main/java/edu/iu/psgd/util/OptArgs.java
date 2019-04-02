@@ -24,6 +24,7 @@ public class OptArgs {
         options.addOption(Utils.createOption(Constant.NO_OF_THREADS, true, "No of threads", false));
         options.addOption(Utils.createOption(Constant.NO_OF_WORKERS, true, "No of workers", false));
         options.addOption(Utils.createOption(Constant.SPLIT_RATIO, true, "Training and Testing data split ration (ex: 0.80)", false));
+        options.addOption(Constant.LOG_SAVE_PATH, true, "Log save Path (ex: /tmp/results.csv");
 
         CommandLineParser commandLineParser = new DefaultParser();
         CommandLine cmd = commandLineParser.parse(options, this.args);
@@ -34,7 +35,7 @@ public class OptArgs {
         boolean isSplit = cmd.hasOption(Constant.IS_SPLIT);
         int features = Integer.parseInt(cmd.getOptionValue(Constant.FEATURES));
         int trainingSamples = Integer.parseInt(cmd.getOptionValue(Constant.TRAINING_SAMPLES));
-
+        String logSavePath = cmd.getOptionValue(Constant.LOG_SAVE_PATH);
         int testingSamples = 0;
         int noOfThreads = 1;
         int noOfWorkers = 1;
@@ -56,7 +57,7 @@ public class OptArgs {
             splitRation = Double.parseDouble(cmd.getOptionValue(Constant.SPLIT_RATIO));
         }
 
-        params = new Params(dataset, iterations, alpha, "", isSplit, features, trainingSamples, testingSamples, noOfThreads, noOfWorkers, splitRation);
+        params = new Params(dataset, iterations, alpha, "", isSplit, features, trainingSamples, testingSamples, noOfThreads, noOfWorkers, splitRation, logSavePath);
     }
 
     public Params getParams() {

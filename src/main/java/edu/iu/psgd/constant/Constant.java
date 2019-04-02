@@ -13,5 +13,6 @@ public class Constant {
     public static String NO_OF_THREADS = "threads";
     public static String NO_OF_WORKERS = "workers";
     public static String SPLIT_RATIO = "ratio";
+    public static String LOG_SAVE_PATH = "logPath";
 
 }
