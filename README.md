@@ -19,4 +19,8 @@ The format of the file must be as follows.
 ```csv
 label, feature_1, feature_2, ...., feature_d
 ```
+Currently we only support Single file based data splitting and run. 
+
+Dynamic run modes will be available in the first release.
+
 Refer to the bin folder scripts. 
