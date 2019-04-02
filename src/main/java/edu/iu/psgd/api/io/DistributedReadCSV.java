@@ -84,6 +84,9 @@ public class DistributedReadCSV {
                         }
                         xVals.add(xComp);
                     }
+                    if(row == end) {
+                        break;
+                    }
 
                     row++;
                 }
@@ -92,7 +95,7 @@ public class DistributedReadCSV {
                 LOG.info(String.format("CSV File path :%s \n ",csvFile));
                 LOG.info("IOException : " + e.getMessage());
             }
-
+            System.out.println(String.format("Rank[%d] Data Loading Completed.", world_rank));
 
         }
 

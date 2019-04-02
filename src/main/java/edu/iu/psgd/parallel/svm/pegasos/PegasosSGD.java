@@ -12,6 +12,10 @@ public class PegasosSGD extends SGD {
 
     private static final Logger LOG = Logger.getLogger(PegasosSGD.class.getName());
 
+    private boolean doLog = false;
+
+    private int worldRank = 0;
+
     public PegasosSGD(double[][] X, double[] y, double alpha, int iterations) {
         super(X, y, alpha, iterations);
     }
@@ -29,7 +33,9 @@ public class PegasosSGD extends SGD {
 
         for(int epoch=0; epoch<iterations; epoch++) {
             if(epoch % 10 == 0) {
-                System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+                if(doLog) {
+                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+                }
             }
             for (int i = 0; i < X.length; i++) {
                 double [] xi = X[i];
@@ -48,9 +54,25 @@ public class PegasosSGD extends SGD {
                 }
             }
         }
-        Matrix.printVector(w);
+        //Matrix.printVector(w);
         trainingTime += System.currentTimeMillis();
         trainingTime /= 1000.0;
-        LOG.info(String.format("Training Time  %s s", Long.toString(trainingTime)));
+        //LOG.info(String.format("Rank[%d] Training Time  %s s", worldRank, Long.toString(trainingTime)));
+    }
+
+    public int getWorldRank() {
+        return worldRank;
+    }
+
+    public void setWorldRank(int worldRank) {
+        this.worldRank = worldRank;
+    }
+
+    public boolean isDoLog() {
+        return doLog;
+    }
+
+    public void setDoLog(boolean doLog) {
+        this.doLog = doLog;
     }
 }

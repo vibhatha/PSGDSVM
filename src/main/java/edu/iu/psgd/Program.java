@@ -23,11 +23,14 @@ public class Program {
 
     private static final Logger LOG = Logger.getLogger(Program.class.getName());
 
+    private static final double B2MB = 1024.0 * 1024.0;
+
     public static void main(String[] args) throws NullDataSetException, ParseException, MatrixMultiplicationException, MPIException, IOException {
 
         //parallelAdam(args);
         //sequentialAdam(args);
         //parallelAdamDistributedLoad(args);
+
         distributedSGD(args);
 
     }
@@ -61,6 +64,8 @@ public class Program {
 
         int world_rank = MPI.COMM_WORLD.getRank();
         int world_size = MPI.COMM_WORLD.getSize();
+        LOG.info(String.format("Rank[%d] Total Memory %f MB, Max Memory %f MB", world_rank,
+                ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB));
         OptArgs optArgs = new OptArgs(args);
         optArgs.getArgs();
         Params params = optArgs.getParams();
@@ -71,14 +76,23 @@ public class Program {
         double[][] X = dataSet.getXtrain();
         //Matrix.printMatrix(X);
         double[] y = dataSet.getYtrain();
+        if (world_rank == 0) {
+            LOG.info(String.format("Data Loading Completed, X[%d,%d], y[%d]", X.length, X[0].length, y.length));
+        }
         dataLoadingTime += MPI.wtime();
         double trainingTime = 0.0;
         trainingTime -= MPI.wtime();
+        if (world_rank == 0) {
+            LOG.info(String.format("Training Started"));
+        }
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
+        pegasosSGD.setWorldRank(world_rank);
+        pegasosSGD.setDoLog(false);
         pegasosSGD.sgd();
         trainingTime += MPI.wtime();
-        LOG.info(String.format("Data Loading Time %f \n Training Time : %f \n", dataLoadingTime, trainingTime));
-        if(world_rank == 0) {
+        LOG.info(String.format("Rank[%d] Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank,
+                dataLoadingTime, trainingTime));
+        if (world_rank == 0) {
             Utils.logSave(params, trainingTime, dataLoadingTime);
         }
         MPI.COMM_WORLD.barrier();
