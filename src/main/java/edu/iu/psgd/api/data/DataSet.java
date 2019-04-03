@@ -66,7 +66,8 @@ public class DataSet {
         if(this.isSplit==true) {
             CsvFile csvFile = new CsvFile(this.sourceFile, "csv");
             DistributedReadCSV distributedReadCSV = new DistributedReadCSV(csvFile, this.world_rank, this.world_size, this.datasize, this.isSplit, this.ratio);
-            distributedReadCSV.read();
+            //distributedReadCSV.read();
+            distributedReadCSV.readAdvanced();
             ArrayList<double[]> xvals =  distributedReadCSV.getxVals();
             Collections.shuffle(xvals);
             int samples = xvals.size();

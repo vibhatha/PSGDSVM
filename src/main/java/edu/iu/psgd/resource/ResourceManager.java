@@ -105,7 +105,7 @@ public class ResourceManager {
     public DataSet distributedLoad() {
         this.dataSet = null;
         if(params.isSplit()) {
-            System.out.println("Splitting Data ...");
+            //System.out.println("Splitting Data ...");
             String datasourceBasePath = this.getBasePath();
             String dataFileTrain = datasourceBasePath + params.getDataset() + "/training.csv";
             dataSet = new DataSet(dataFileTrain, params.getFeatures(), params.getTrainingSamples(), params.getSplitRatio(), params.isSplit(), this.world_rank, this.world_size);

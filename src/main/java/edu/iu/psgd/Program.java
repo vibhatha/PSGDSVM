@@ -25,6 +25,8 @@ public class Program {
 
     private static final double B2MB = 1024.0 * 1024.0;
 
+    private static final double N2S = 1000000000;
+
     public static void main(String[] args) throws NullDataSetException, ParseException, MatrixMultiplicationException, MPIException, IOException {
 
         //parallelAdam(args);
@@ -61,41 +63,54 @@ public class Program {
 
     public static void distributedSGD(String[] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException, IOException {
         MPI.Init(args);
-
+        double t1 = 0;
         int world_rank = MPI.COMM_WORLD.getRank();
         int world_size = MPI.COMM_WORLD.getSize();
-        LOG.info(String.format("Rank[%d] Total Memory %f MB, Max Memory %f MB", world_rank,
-                ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB));
+//        LOG.info(String.format("Rank[%d] Total Memory %f MB, Max Memory %f MB", world_rank,
+//                ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB));
         OptArgs optArgs = new OptArgs(args);
         optArgs.getArgs();
         Params params = optArgs.getParams();
         ResourceManager resourceManager = new ResourceManager(params, world_rank, world_size);
         double dataLoadingTime = 0.0;
-        dataLoadingTime -= MPI.wtime();
+        t1 = System.nanoTime();
         DataSet dataSet = resourceManager.distributedLoad();
         double[][] X = dataSet.getXtrain();
         //Matrix.printMatrix(X);
         double[] y = dataSet.getYtrain();
-        if (world_rank == 0) {
+        /*if (world_rank == 0) {
             LOG.info(String.format("Data Loading Completed, X[%d,%d], y[%d]", X.length, X[0].length, y.length));
-        }
-        dataLoadingTime += MPI.wtime();
+        }*/
+        dataLoadingTime = System.nanoTime() - t1;
         double trainingTime = 0.0;
-        trainingTime -= MPI.wtime();
-        if (world_rank == 0) {
+       /* if (world_rank == 0) {
             LOG.info(String.format("Training Started"));
-        }
+        }*/
+        t1 = System.nanoTime();
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.setWorldRank(world_rank);
+        pegasosSGD.setWorld_size(world_size);
         pegasosSGD.setDoLog(false);
         pegasosSGD.sgd();
-        trainingTime += MPI.wtime();
-        LOG.info(String.format("Rank[%d] Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank,
+        double [] w = pegasosSGD.getW();
+        double [] globalW = new double[w.length];
+        try {
+            MPI.COMM_WORLD.allReduce(w, globalW, 1, MPI.DOUBLE, MPI.SUM);
+            //MPI.COMM_WORLD.reduce(w, globalW, 1, MPI.DOUBLE, MPI.SUM, 0);
+        } catch (MPIException e) {
+            System.out.println("Exception : " + e.getMessage());
+        }
+        trainingTime = System.nanoTime() - t1;
+        trainingTime /= N2S;
+        dataLoadingTime /= N2S;
+        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank, y.length, ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB,
                 dataLoadingTime, trainingTime));
         if (world_rank == 0) {
+            double[] wFinal = Matrix.scalarDivide(globalW, world_size);
             Utils.logSave(params, trainingTime, dataLoadingTime);
         }
-        MPI.COMM_WORLD.barrier();
+        //MPI.COMM_WORLD.barrier();
+        System.gc();
         MPI.Finalize();
 
     }
