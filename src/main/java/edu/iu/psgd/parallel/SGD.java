@@ -41,6 +41,8 @@ public abstract class SGD {
 
     public abstract void sgd() throws NullDataSetException, MatrixMultiplicationException;
 
+    public abstract void sgdEnsemble() throws NullDataSetException, MatrixMultiplicationException;
+
     public double[] getW() {
         return w;
     }

@@ -1,6 +1,7 @@
 package edu.iu.psgd.util;
 
 import edu.iu.psgd.constant.Constant;
+import edu.iu.psgd.constant.SVMType;
 import org.apache.commons.cli.*;
 
 public class OptArgs {
@@ -20,6 +21,7 @@ public class OptArgs {
         options.addOption(Constant.IS_SPLIT, false, "Splitting dataset (ex: true or false ");
         options.addOption(Constant.FEATURES, true, "Features in the dataset ");
         options.addOption(Constant.TRAINING_SAMPLES, true, "Training samples in the dataset ");
+        options.addOption(Constant.SVM_TYPE, true, "Training samples in the dataset ");
         options.addOption(Utils.createOption(Constant.TESTING_SAMPLES, true, "Testing samples in the dataset ", false));
         options.addOption(Utils.createOption(Constant.NO_OF_THREADS, true, "No of threads", false));
         options.addOption(Utils.createOption(Constant.NO_OF_WORKERS, true, "No of workers", false));
@@ -36,6 +38,7 @@ public class OptArgs {
         int features = Integer.parseInt(cmd.getOptionValue(Constant.FEATURES));
         int trainingSamples = Integer.parseInt(cmd.getOptionValue(Constant.TRAINING_SAMPLES));
         String logSavePath = cmd.getOptionValue(Constant.LOG_SAVE_PATH);
+        SVMType svmType = cmd.getOptionValue(Constant.SVM_TYPE).equalsIgnoreCase(String.valueOf(SVMType.ENSEMBLE)) ? SVMType.ENSEMBLE : SVMType.DEFAULT;
         int testingSamples = 0;
         int noOfThreads = 1;
         int noOfWorkers = 1;
@@ -57,7 +60,7 @@ public class OptArgs {
             splitRation = Double.parseDouble(cmd.getOptionValue(Constant.SPLIT_RATIO));
         }
 
-        params = new Params(dataset, iterations, alpha, "", isSplit, features, trainingSamples, testingSamples, noOfThreads, noOfWorkers, splitRation, logSavePath);
+        params = new Params(dataset, iterations, alpha, "", isSplit, features, trainingSamples, testingSamples, noOfThreads, noOfWorkers, splitRation, logSavePath, svmType);
     }
 
     public Params getParams() {

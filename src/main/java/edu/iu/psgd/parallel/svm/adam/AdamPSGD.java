@@ -91,4 +91,9 @@ public class AdamPSGD extends SGD {
         trainingTime /= 1000.0;
         //System.out.println((String.format("Training Time  %s s", Long.toString(trainingTime))));
     }
+
+    @Override
+    public void sgdEnsemble() throws NullDataSetException, MatrixMultiplicationException {
+
+    }
 }

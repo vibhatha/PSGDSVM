@@ -65,6 +65,63 @@ public class PegasosSGD extends SGD {
                     w = Matrix.subtract(w, wa);
                 }
             }
+            globalW = new double[w.length];
+            try {
+                MPI.COMM_WORLD.allReduce(w, globalW, 1, MPI.DOUBLE, MPI.SUM);
+            } catch (MPIException e) {
+                System.out.println("Exception : " + e.getMessage());
+            }
+            w = Matrix.scalarDivide(globalW, world_size);
+        }
+
+        //Matrix.printVector(w);
+        //trainingTime += System.currentTimeMillis();
+        //trainingTime /= 1000.0;
+        //LOG.info(String.format("Rank[%d] Training Time  %s s", worldRank, Long.toString(trainingTime)));
+    }
+
+    @Override
+    public void sgdEnsemble() throws NullDataSetException, MatrixMultiplicationException {
+        if (isInvalid) {
+            throw new NullDataSetException("Invalid data source with no features or no data");
+        } else {
+            if(doLog) {
+                LOG.info(String.format("X.shape (%d,%d), Y.shape (%d)", X.length, X[0].length, y.length));
+            }
+        }
+        //trainingTime -= System.currentTimeMillis();
+        int features = X[0].length;
+        w = Initializer.initialWeights(features);
+        double [] xi = null;
+        double yi =-1;
+        double condition = 1;
+        double [] Xyia = null;
+        double [] wa;
+        double [] globalW = Initializer.initZeros(features);
+
+        for(int epoch=0; epoch<iterations; epoch++) {
+//            if(epoch % 10 == 0) {
+//                if(doLog) {
+//                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
+//                }
+//            }
+            for (int i = 0; i < X.length; i++) {
+                xi = X[i];
+                yi = y[i];
+                condition = yi * Matrix.dot(xi,w);
+                //System.out.println(condition);
+
+                if(condition < 1) {
+                    Xyia = new double[X.length];
+                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w,Matrix.scalarMultiply(xi, yi)), alpha);
+                    w = Matrix.subtract(w, Xyia);
+                } else {
+                    wa = new double[w.length];
+                    wa = Matrix.scalarMultiply(w, alpha);
+                    w = Matrix.subtract(w, wa);
+                }
+            }
+
         }
 
         //Matrix.printVector(w);

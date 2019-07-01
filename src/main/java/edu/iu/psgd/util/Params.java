@@ -1,5 +1,7 @@
 package edu.iu.psgd.util;
 
+import edu.iu.psgd.constant.SVMType;
+
 public class Params {
 
     private String dataset = "";
@@ -14,6 +16,7 @@ public class Params {
     private int noOfWorkers = 1;
     private double splitRatio = 0.80;
     private String logSavePath = "";
+    private SVMType svmType = SVMType.ENSEMBLE;
 
     public Params(String dataset, int iterations, double alpha, String basePath, boolean split, int features,
                   int trainingSamples, int testingSamples, int noOfThreads, int noOfWorkers, double splitRatio) {
@@ -43,6 +46,22 @@ public class Params {
         this.noOfWorkers = noOfWorkers;
         this.splitRatio = splitRatio;
         this.logSavePath = logSavePath;
+    }
+
+    public Params(String dataset, int iterations, double alpha, String basePath, boolean split, int features, int trainingSamples, int testingSamples, int noOfThreads, int noOfWorkers, double splitRatio, String logSavePath, SVMType svmType) {
+        this.dataset = dataset;
+        this.iterations = iterations;
+        this.alpha = alpha;
+        this.basePath = basePath;
+        this.split = split;
+        this.features = features;
+        this.trainingSamples = trainingSamples;
+        this.testingSamples = testingSamples;
+        this.noOfThreads = noOfThreads;
+        this.noOfWorkers = noOfWorkers;
+        this.splitRatio = splitRatio;
+        this.logSavePath = logSavePath;
+        this.svmType = svmType;
     }
 
     public String getDataset() {
@@ -133,6 +152,14 @@ public class Params {
         this.splitRatio = splitRatio;
     }
 
+    public SVMType getSvmType() {
+        return svmType;
+    }
+
+    public void setSvmType(SVMType svmType) {
+        this.svmType = svmType;
+    }
+
     public String getLogSavePath() {
         return logSavePath;
     }
@@ -143,10 +170,20 @@ public class Params {
 
     @Override
     public String toString() {
-        String s = "";
-        s = noOfWorkers + "," + dataset + "," + iterations + "," + alpha + "," + features + "," + trainingSamples + "," + noOfThreads + ",";
-        return s;
+        return "Params{" +
+                "dataset='" + dataset + '\'' +
+                ", iterations=" + iterations +
+                ", alpha=" + alpha +
+                ", basePath='" + basePath + '\'' +
+                ", split=" + split +
+                ", features=" + features +
+                ", trainingSamples=" + trainingSamples +
+                ", testingSamples=" + testingSamples +
+                ", noOfThreads=" + noOfThreads +
+                ", noOfWorkers=" + noOfWorkers +
+                ", splitRatio=" + splitRatio +
+                ", logSavePath='" + logSavePath + '\'' +
+                ", svmType=" + svmType +
+                '}';
     }
-
-
 }
