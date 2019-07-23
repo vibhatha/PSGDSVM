@@ -12,7 +12,7 @@
         <dependency>
             <groupId>ompi</groupId>
             <artifactId>ompijavabinding</artifactId>
-            <version>3.1.2</version>
+            <version>3.0.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
@@ -58,11 +58,26 @@
             <scope>test</scope>
         </dependency>
 
+        <!--ND4j Dependencies Start-->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native-platform</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+        <!--ND4j Dependencies End-->
+
     </dependencies>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <dl4j.version>0.9.1</dl4j.version>
     </properties>
 
 
