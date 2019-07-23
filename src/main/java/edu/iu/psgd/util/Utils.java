@@ -20,11 +20,11 @@ public class Utils {
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(fileWriter);
-            String s = params.toString();
-            s += dataLoadinTime + "," + trainingTime + "," + (dataLoadinTime + trainingTime);
+            String s = params.csvString();
+            s += "," + dataLoadinTime + "," + trainingTime + "," + (dataLoadinTime + trainingTime);
             bufferedWriter.write(s);
             bufferedWriter.newLine();
-        }finally {
+        } finally {
             bufferedWriter.close();
         }
     }

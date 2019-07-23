@@ -186,4 +186,11 @@ public class Params {
                 ", svmType=" + svmType +
                 '}';
     }
+
+    public String csvString() {
+        String s = "";
+        s += dataset + "," + iterations + "," + alpha + "," + split + "," + features + "," + trainingSamples + ","
+                + testingSamples + "," + noOfThreads + "," + noOfWorkers + "," + split + "," + svmType;
+        return s;
+    }
 }
