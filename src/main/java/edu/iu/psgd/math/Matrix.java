@@ -13,8 +13,24 @@ public class Matrix {
         return result;
     }
 
+    public static double[] scalarMultiplyR(double [] X, double y, double [] result) {
+        // TODO : make result one time get it from outside
+
+        for (int i = 0; i < X.length; i++) {
+            result[i] = X[i] * y;
+        }
+        return result;
+    }
+
     public static double[] scalarDivide(double [] X, double y) {
         double [] result = new double [X.length];
+        for (int i = 0; i < X.length; i++) {
+            result[i] = X[i] / y;
+        }
+        return result;
+    }
+
+    public static double[] scalarDivideR(double [] X, double y, double[] result) {
         for (int i = 0; i < X.length; i++) {
             result[i] = X[i] / y;
         }
@@ -84,6 +100,18 @@ public class Matrix {
     public static double [] subtract(double [] w1, double [] w2) throws MatrixMultiplicationException {
         if(w1.length == w2.length) {
             double [] result = new double[w1.length];
+            for (int i = 0; i < w1.length; i++) {
+                result[i] = w1[i] - w2[i];
+            }
+            return result;
+        }else {
+            throw new MatrixMultiplicationException("Invalid Dimensions X.length "
+                    + w1.length + ", w.length : " + w2.length );
+        }
+    }
+
+    public static double [] subtractR(double [] w1, double [] w2, double[] result) throws MatrixMultiplicationException {
+        if(w1.length == w2.length) {
             for (int i = 0; i < w1.length; i++) {
                 result[i] = w1[i] - w2[i];
             }

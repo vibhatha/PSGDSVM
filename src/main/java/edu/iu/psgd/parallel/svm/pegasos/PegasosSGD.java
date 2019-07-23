@@ -44,7 +44,8 @@ public class PegasosSGD extends SGD {
         double[] Xyia = null;
         double[] wa;
         double[] globalW = Initializer.initZeros(features);
-
+        double[] temp1 = new double[features];
+        globalW = new double[w.length];
         for (int epoch = 0; epoch < iterations; epoch++) {
 //            if(epoch % 10 == 0) {
 //                if(doLog) {
@@ -58,23 +59,21 @@ public class PegasosSGD extends SGD {
                 condition = yi * Matrix.dot(xi, w);
                 //System.out.println(condition);
                 if (condition < 1) {
-                    Xyia = new double[X.length];
                     //TODO:  matrix mul library usage : pass output array from here
-                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w, Matrix.scalarMultiply(xi, yi)), alpha);
-                    w = Matrix.subtract(w, Xyia);
+                    Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp1), alpha, temp1);
+                    w = Matrix.subtractR(w, Xyia, temp1);
                 } else {
-                    wa = new double[w.length];
-                    wa = Matrix.scalarMultiply(w, alpha);
-                    w = Matrix.subtract(w, wa);
+                    wa = Matrix.scalarMultiplyR(w, alpha, temp1);
+                    w = Matrix.subtractR(w, wa, temp1);
                 }
             }
-            globalW = new double[w.length];
+
             try {
                 MPI.COMM_WORLD.allReduce(w, globalW, 1, MPI.DOUBLE, MPI.SUM);
             } catch (MPIException e) {
                 System.out.println("Exception : " + e.getMessage());
             }
-            w = Matrix.scalarDivide(globalW, world_size);
+            w = Matrix.scalarDivideR(globalW, world_size, temp1);
         }
 
         //Matrix.printVector(w);
