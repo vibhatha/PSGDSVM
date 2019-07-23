@@ -58,6 +58,18 @@ public class Matrix {
         }
     }
 
+    public static double [] multiplyR(double [] X, double [] w, double [] result) throws MatrixMultiplicationException {
+        if(X.length == w.length) {
+            for (int i = 0; i < X.length; i++) {
+                result[i] = X[i] * w[i];
+            }
+            return result;
+        }else {
+            throw new MatrixMultiplicationException("Invalid Dimensions X.length "
+                    + X.length + ", w.length : " + w.length );
+        }
+    }
+
     public static double [] divide(double [] X, double [] w) throws MatrixMultiplicationException {
         if(X.length == w.length) {
             double [] result = new double[X.length];

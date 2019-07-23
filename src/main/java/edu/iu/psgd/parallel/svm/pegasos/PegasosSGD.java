@@ -34,6 +34,10 @@ public class PegasosSGD extends SGD {
             }
         }
         //trainingTime -= System.currentTimeMillis();
+        if(worldRank == 0) {
+            System.out.println("Iterations : " + iterations);
+            System.out.println("Data Size : " + X.length);
+        }
         int features = X[0].length;
         w = Initializer.initialWeights(features);
         double[] xi = null;

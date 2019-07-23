@@ -98,6 +98,7 @@ public class Program {
             LOG.info(String.format("Training Started"));
         }*/
         t1 = System.nanoTime();
+        double t2 = MPI.wtime();
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.setWorldRank(world_rank);
         pegasosSGD.setWorld_size(world_size);
@@ -111,11 +112,14 @@ public class Program {
         } catch (MPIException e) {
             System.out.println("Exception : " + e.getMessage());
         }
+        double t3 = MPI.wtime();
         trainingTime = System.nanoTime() - t1;
         trainingTime /= N2S;
         dataLoadingTime /= N2S;
+        double trainingTimeWT = t3 - t2;
         LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank, y.length, ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
                 dataLoadingTime, trainingTime));
+        System.out.println(String.format("Sys Time : %f, WTime : %f", trainingTime, trainingTimeWT));
         if (world_rank == 0) {
             double[] wFinal = Matrix.scalarDivide(globalW, world_size);
             Utils.logSave(params, trainingTime, dataLoadingTime);
@@ -151,6 +155,7 @@ public class Program {
        /* if (world_rank == 0) {
             LOG.info(String.format("Training Started"));
         }*/
+        double t2 = MPI.wtime();
         t1 = System.nanoTime();
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.setWorldRank(world_rank);
@@ -159,11 +164,16 @@ public class Program {
         pegasosSGD.sgd();
         double[] w = pegasosSGD.getW();
         MPI.COMM_WORLD.barrier();
+        double t3 = MPI.wtime();
+        double trainingTimeWT = t3 - t2;
         trainingTime = System.nanoTime() - t1;
         trainingTime /= N2S;
         dataLoadingTime /= N2S;
-        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank, y.length, ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
+        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => " +
+                        "Data Loading Time %f , Training Time : %f ", world_rank, y.length,
+                ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
                 dataLoadingTime, trainingTime));
+        System.out.println(String.format("Sys Time : %f, WTime : %f \n", trainingTime, trainingTimeWT));
         if (world_rank == 0) {
             Utils.logSave(params, trainingTime, dataLoadingTime);
         }
