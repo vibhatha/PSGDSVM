@@ -138,6 +138,8 @@ public class Program {
         double dataLoadingTime = 0.0;
         t1 = System.nanoTime();
         DataSet dataSet = resourceManager.distributedLoad();
+        MPI.COMM_WORLD.barrier();
+        //TODO :: off heap array definition
         double[][] X = dataSet.getXtrain();
         //Matrix.printMatrix(X);
         double[] y = dataSet.getYtrain();
@@ -156,6 +158,7 @@ public class Program {
         pegasosSGD.setDoLog(false);
         pegasosSGD.sgd();
         double[] w = pegasosSGD.getW();
+        MPI.COMM_WORLD.barrier();
         trainingTime = System.nanoTime() - t1;
         trainingTime /= N2S;
         dataLoadingTime /= N2S;
@@ -164,7 +167,7 @@ public class Program {
         if (world_rank == 0) {
             Utils.logSave(params, trainingTime, dataLoadingTime);
         }
-        System.gc();
+        //System.gc();
         MPI.Finalize();
 
     }

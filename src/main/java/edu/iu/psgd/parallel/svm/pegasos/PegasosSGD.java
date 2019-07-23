@@ -29,21 +29,23 @@ public class PegasosSGD extends SGD {
         if (isInvalid) {
             throw new NullDataSetException("Invalid data source with no features or no data");
         } else {
-            if(doLog) {
+            if (doLog) {
                 LOG.info(String.format("X.shape (%d,%d), Y.shape (%d)", X.length, X[0].length, y.length));
             }
         }
         //trainingTime -= System.currentTimeMillis();
         int features = X[0].length;
         w = Initializer.initialWeights(features);
-        double [] xi = null;
-        double yi =-1;
+        double[] xi = null;
+        double yi = -1;
         double condition = 1;
-        double [] Xyia = null;
-        double [] wa;
-        double [] globalW = Initializer.initZeros(features);
+        // one time creation for Xyia and wa
+        // represent X[][] => X1[] with offset (X1.length = X.length * X[0].length)
+        double[] Xyia = null;
+        double[] wa;
+        double[] globalW = Initializer.initZeros(features);
 
-        for(int epoch=0; epoch<iterations; epoch++) {
+        for (int epoch = 0; epoch < iterations; epoch++) {
 //            if(epoch % 10 == 0) {
 //                if(doLog) {
 //                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
@@ -52,12 +54,13 @@ public class PegasosSGD extends SGD {
             for (int i = 0; i < X.length; i++) {
                 xi = X[i];
                 yi = y[i];
-                condition = yi * Matrix.dot(xi,w);
+                // TODO: Java AVX Support :D
+                condition = yi * Matrix.dot(xi, w);
                 //System.out.println(condition);
-
-                if(condition < 1) {
+                if (condition < 1) {
                     Xyia = new double[X.length];
-                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w,Matrix.scalarMultiply(xi, yi)), alpha);
+                    //TODO:  matrix mul library usage : pass output array from here
+                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w, Matrix.scalarMultiply(xi, yi)), alpha);
                     w = Matrix.subtract(w, Xyia);
                 } else {
                     wa = new double[w.length];
@@ -85,21 +88,21 @@ public class PegasosSGD extends SGD {
         if (isInvalid) {
             throw new NullDataSetException("Invalid data source with no features or no data");
         } else {
-            if(doLog) {
+            if (doLog) {
                 LOG.info(String.format("X.shape (%d,%d), Y.shape (%d)", X.length, X[0].length, y.length));
             }
         }
         //trainingTime -= System.currentTimeMillis();
         int features = X[0].length;
         w = Initializer.initialWeights(features);
-        double [] xi = null;
-        double yi =-1;
+        double[] xi = null;
+        double yi = -1;
         double condition = 1;
-        double [] Xyia = null;
-        double [] wa;
-        double [] globalW = Initializer.initZeros(features);
+        double[] Xyia = null;
+        double[] wa;
+        double[] globalW = Initializer.initZeros(features);
 
-        for(int epoch=0; epoch<iterations; epoch++) {
+        for (int epoch = 0; epoch < iterations; epoch++) {
 //            if(epoch % 10 == 0) {
 //                if(doLog) {
 //                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
@@ -108,12 +111,12 @@ public class PegasosSGD extends SGD {
             for (int i = 0; i < X.length; i++) {
                 xi = X[i];
                 yi = y[i];
-                condition = yi * Matrix.dot(xi,w);
+                condition = yi * Matrix.dot(xi, w);
                 //System.out.println(condition);
 
-                if(condition < 1) {
+                if (condition < 1) {
                     Xyia = new double[X.length];
-                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w,Matrix.scalarMultiply(xi, yi)), alpha);
+                    Xyia = Matrix.scalarMultiply(Matrix.subtract(w, Matrix.scalarMultiply(xi, yi)), alpha);
                     w = Matrix.subtract(w, Xyia);
                 } else {
                     wa = new double[w.length];

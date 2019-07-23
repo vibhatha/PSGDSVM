@@ -5,6 +5,7 @@ import edu.iu.psgd.exceptions.MatrixMultiplicationException;
 public class Matrix {
 
     public static double[] scalarMultiply(double [] X, double y) {
+        // TODO : make result one time get it from outside
         double [] result = new double [X.length];
         for (int i = 0; i < X.length; i++) {
             result[i] = X[i] * y;
