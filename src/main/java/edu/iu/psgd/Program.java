@@ -1,5 +1,6 @@
 package edu.iu.psgd;
 
+import com.google.common.base.Stopwatch;
 import edu.iu.psgd.api.data.DataSet;
 import edu.iu.psgd.constant.SVMType;
 import edu.iu.psgd.exceptions.MatrixMultiplicationException;
@@ -19,6 +20,7 @@ import mpi.MPIException;
 import org.apache.commons.cli.ParseException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class Program {
@@ -242,11 +244,14 @@ public class Program {
         }*/
         double t2 = MPI.wtime();
         t1 = System.nanoTime();
+        final Stopwatch stopwatch = Stopwatch.createStarted();
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.setWorldRank(world_rank);
         pegasosSGD.setWorld_size(world_size);
         pegasosSGD.setDoLog(false);
         pegasosSGD.bSgd();
+        long t =  stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        System.out.println("Time in Seconds : " + (double) t / 1000.0);
         double[] w = pegasosSGD.getW();
         MPI.COMM_WORLD.barrier();
         double t3 = MPI.wtime();
@@ -264,7 +269,7 @@ public class Program {
 //                dataLoadingTimeD, trainingTimeD));
         System.out.println(String.format("Sys Time : %f, WTime : %f \n", trainingTimeD, trainingTimeWT));
         if (world_rank == 0) {
-            LOG.info("Distributed SVM DEFAULT");
+            LOG.info("Distributed SVM BLAS");
             String s = "";
             s += "Comm Time = " + commTime + "\n";
             s += "Comp Time = " + compTime + "\n";

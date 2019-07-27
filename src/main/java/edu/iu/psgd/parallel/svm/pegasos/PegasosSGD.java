@@ -40,7 +40,7 @@ public class PegasosSGD extends SGD {
         double commTime = 0;
 
         //trainingTime -= System.currentTimeMillis();
-        if(worldRank == 0) {
+        if (worldRank == 0) {
             System.out.println("Iterations : " + iterations);
             System.out.println("Data Size : " + X.length);
         }
@@ -90,7 +90,7 @@ public class PegasosSGD extends SGD {
                     wa = Matrix.scalarMultiplyR(w, alpha, temp5);
                     w = Matrix.subtractR(w, wa, temp6);
                 }
-                count++;
+
             }
             try {
                 commTime = MPI.wtime();
@@ -110,11 +110,6 @@ public class PegasosSGD extends SGD {
             w = Matrix.scalarDivideR(globalW, world_size, temp1);
         }
 
-        //Matrix.printVector(w);
-        //trainingTime += System.currentTimeMillis();
-        //trainingTime /= 1000.0;
-        //LOG.info(String.format("Rank[%d] Training Time  %s s", worldRank, Long.toString(trainingTime)));
-        System.out.println("Count : " + count);
     }
 
     @Override
@@ -179,7 +174,7 @@ public class PegasosSGD extends SGD {
         double commTime = 0;
 
         //trainingTime -= System.currentTimeMillis();
-        if(worldRank == 0) {
+        if (worldRank == 0) {
             System.out.println("Iterations : " + iterations);
             System.out.println("Data Size : " + X.length);
         }
@@ -201,7 +196,11 @@ public class PegasosSGD extends SGD {
         double[] temp6 = new double[features];
         globalW = new double[w.length];
         int count = 0;
+        long t1 = System.currentTimeMillis();
         BLAS b = BLAS.getInstance();
+        long t2 = System.currentTimeMillis();
+        final int incX = 1;
+        final int incY  = 1;
         for (int epoch = 0; epoch < iterations; epoch++) {
 //            if(epoch % 100 == 0 && worldRank == 0) {
 //                if(true) {
@@ -213,7 +212,7 @@ public class PegasosSGD extends SGD {
                 yi = y[i];
                 // TODO: Java AVX Support :D
                 //condition = yi * Matrix.dot(xi, w);
-                condition = b.ddot(features, xi, 1, w, 1 );
+                condition = yi * b.ddot(features, xi, 1, w, 1);
                 if (condition < 1) {
                     //TODO:  matrix mul library usage : pass output array from here
                     /*
@@ -221,8 +220,8 @@ public class PegasosSGD extends SGD {
                     cblas_daxpy(features, alpha * y[j], X[j], 1, xiyi, 1.0);
                     cblas_daxpy(features, alpha , xiyi, 1, w, 1.0);*/
 
-                    b.daxpy(features, alpha * yi, xi, 1, Xyia, 1);
-                    b.daxpy(features,  alpha,  Xyia, 1, w, 1);
+                    b.daxpy(features, alpha * yi, xi, incX, Xyia, incY);
+                    b.daxpy(features, alpha, Xyia, incX, w, incY);
                     //Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp2), alpha, temp3);
 
                     //w = Matrix.subtractR(w, Xyia, temp4);
@@ -231,11 +230,11 @@ public class PegasosSGD extends SGD {
                      * C++ Blass Corresponding
                      * cblas_daxpy(features, alpha , w, 1, w, 1.0);
                      * */
-                    b.daxpy(features, alpha, w, 1, w, 1);
+                    b.daxpy(features, alpha, w, incX, w, incY);
                     //wa = Matrix.scalarMultiplyR(w, alpha, temp5);
                     //w = Matrix.subtractR(w, wa, temp6);
                 }
-                count++;
+
             }
             try {
                 commTime = MPI.wtime();
@@ -260,6 +259,7 @@ public class PegasosSGD extends SGD {
         //trainingTime /= 1000.0;
         //LOG.info(String.format("Rank[%d] Training Time  %s s", worldRank, Long.toString(trainingTime)));
         System.out.println("Count : " + count);
+        System.out.println("Lib Load Time : " + (double) (t2 - t1) / 1000.0 + ", d : " + condition);
     }
 
     public int getWorldRank() {
