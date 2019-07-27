@@ -38,7 +38,7 @@ public class OptArgs {
         int features = Integer.parseInt(cmd.getOptionValue(Constant.FEATURES));
         int trainingSamples = Integer.parseInt(cmd.getOptionValue(Constant.TRAINING_SAMPLES));
         String logSavePath = cmd.getOptionValue(Constant.LOG_SAVE_PATH);
-        SVMType svmType = cmd.getOptionValue(Constant.SVM_TYPE).equalsIgnoreCase(String.valueOf(SVMType.ENSEMBLE)) ? SVMType.ENSEMBLE : SVMType.DEFAULT;
+        SVMType svmType = getSVMType(cmd.getOptionValue(Constant.SVM_TYPE));
         int testingSamples = 0;
         int noOfThreads = 1;
         int noOfWorkers = 1;
@@ -65,5 +65,18 @@ public class OptArgs {
 
     public Params getParams() {
         return params;
+    }
+
+    private SVMType getSVMType(String s) {
+        if(s.equalsIgnoreCase(String.valueOf(SVMType.DEFAULT))) {
+            return SVMType.DEFAULT;
+        }
+        if(s.equalsIgnoreCase(String.valueOf(SVMType.ENSEMBLE))) {
+            return SVMType.ENSEMBLE;
+        }
+        if(s.equalsIgnoreCase(String.valueOf(SVMType.OTHER))) {
+            return SVMType.OTHER;
+        }
+        return SVMType.DEFAULT;
     }
 }

@@ -20,6 +20,8 @@ public class PegasosSGD extends SGD {
 
     private int world_size = 0;
 
+    public double communicationTime = 0;
+
     public PegasosSGD(double[][] X, double[] y, double alpha, int iterations) {
         super(X, y, alpha, iterations);
     }
@@ -33,6 +35,8 @@ public class PegasosSGD extends SGD {
                 LOG.info(String.format("X.shape (%d,%d), Y.shape (%d)", X.length, X[0].length, y.length));
             }
         }
+        double commTime = 0;
+
         //trainingTime -= System.currentTimeMillis();
         if(worldRank == 0) {
             System.out.println("Iterations : " + iterations);
@@ -49,10 +53,16 @@ public class PegasosSGD extends SGD {
         double[] wa;
         double[] globalW = Initializer.initZeros(features);
         double[] temp1 = new double[features];
+        double[] temp2 = new double[features];
+        double[] temp3 = new double[features];
+        double[] temp4 = new double[features];
+        double[] temp5 = new double[features];
+        double[] temp6 = new double[features];
         globalW = new double[w.length];
+        int count = 0;
         for (int epoch = 0; epoch < iterations; epoch++) {
-//            if(epoch % 10 == 0) {
-//                if(doLog) {
+//            if(epoch % 100 == 0 && worldRank == 0) {
+//                if(true) {
 //                    System.out.println((String.format("Epoch %d/%d", epoch, iterations)));
 //                }
 //            }
@@ -61,21 +71,31 @@ public class PegasosSGD extends SGD {
                 yi = y[i];
                 // TODO: Java AVX Support :D
                 condition = yi * Matrix.dot(xi, w);
-                //System.out.println(condition);
+
                 if (condition < 1) {
                     //TODO:  matrix mul library usage : pass output array from here
-                    Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp1), alpha, temp1);
-                    w = Matrix.subtractR(w, Xyia, temp1);
+                    Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp2), alpha, temp3);
+                    w = Matrix.subtractR(w, Xyia, temp4);
                 } else {
-                    wa = Matrix.scalarMultiplyR(w, alpha, temp1);
-                    w = Matrix.subtractR(w, wa, temp1);
+                    wa = Matrix.scalarMultiplyR(w, alpha, temp5);
+                    w = Matrix.subtractR(w, wa, temp6);
                 }
+                count++;
             }
-
+            try {
+                commTime = MPI.wtime();
+            } catch (MPIException e) {
+                e.printStackTrace();
+            }
             try {
                 MPI.COMM_WORLD.allReduce(w, globalW, 1, MPI.DOUBLE, MPI.SUM);
             } catch (MPIException e) {
                 System.out.println("Exception : " + e.getMessage());
+            }
+            try {
+                communicationTime += MPI.wtime() - commTime;
+            } catch (MPIException e) {
+                e.printStackTrace();
             }
             w = Matrix.scalarDivideR(globalW, world_size, temp1);
         }
@@ -84,6 +104,7 @@ public class PegasosSGD extends SGD {
         //trainingTime += System.currentTimeMillis();
         //trainingTime /= 1000.0;
         //LOG.info(String.format("Rank[%d] Training Time  %s s", worldRank, Long.toString(trainingTime)));
+        System.out.println("Count : " + count);
     }
 
     @Override

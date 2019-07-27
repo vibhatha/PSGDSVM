@@ -10,6 +10,7 @@ import edu.iu.psgd.parallel.svm.adam.AdamSGD;
 import edu.iu.psgd.parallel.svm.pegasos.PegasosSGD;
 import edu.iu.psgd.predict.Predict;
 import edu.iu.psgd.resource.ResourceManager;
+import edu.iu.psgd.util.BlassUtils;
 import edu.iu.psgd.util.OptArgs;
 import edu.iu.psgd.util.Params;
 import edu.iu.psgd.util.Utils;
@@ -41,12 +42,18 @@ public class Program {
         optArgs.getArgs();
         params = optArgs.getParams();
 
+        LOG.info("SVM_TYPE : " + params.getSvmType());
+
         if (params.getSvmType() == SVMType.DEFAULT) {
             distributedSVM(args);
         }
 
         if (params.getSvmType() == SVMType.ENSEMBLE) {
             distributedEnsembleSVM(args);
+        }
+
+        if (params.getSvmType() == SVMType.OTHER) {
+            openBlasBenchmark();
         }
 
 
@@ -84,7 +91,7 @@ public class Program {
         params = optArgs.getParams();
         ResourceManager resourceManager = new ResourceManager(params, world_rank, world_size);
         double dataLoadingTime = 0.0;
-        t1 = System.nanoTime();
+        t1 = System.currentTimeMillis();
         DataSet dataSet = resourceManager.distributedLoad();
         double[][] X = dataSet.getXtrain();
         //Matrix.printMatrix(X);
@@ -92,12 +99,12 @@ public class Program {
         /*if (world_rank == 0) {
             LOG.info(String.format("Data Loading Completed, X[%d,%d], y[%d]", X.length, X[0].length, y.length));
         }*/
-        dataLoadingTime = System.nanoTime() - t1;
+        dataLoadingTime = System.currentTimeMillis() - t1;
         double trainingTime = 0.0;
        /* if (world_rank == 0) {
             LOG.info(String.format("Training Started"));
         }*/
-        t1 = System.nanoTime();
+        t1 = System.currentTimeMillis();
         double t2 = MPI.wtime();
         PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
         pegasosSGD.setWorldRank(world_rank);
@@ -113,9 +120,9 @@ public class Program {
             System.out.println("Exception : " + e.getMessage());
         }
         double t3 = MPI.wtime();
-        trainingTime = System.nanoTime() - t1;
-        trainingTime /= N2S;
-        dataLoadingTime /= N2S;
+        trainingTime = System.currentTimeMillis() - t1;
+        trainingTime /= 1000.0;
+        dataLoadingTime /= 1000.0;
         double trainingTimeWT = t3 - t2;
         LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => Data Loading Time %f , Training Time : %f ", world_rank, y.length, ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
                 dataLoadingTime, trainingTime));
@@ -132,14 +139,20 @@ public class Program {
 
     public static void distributedSVM(String[] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException, IOException {
         MPI.Init(args);
-        double t1 = 0;
+
+
+        long t1 = 0;
         int world_rank = MPI.COMM_WORLD.getRank();
         int world_size = MPI.COMM_WORLD.getSize();
+        if(world_rank == 0) {
+            LOG.info("Distributed SVM DEFAULT");
+        }
+
 //        LOG.info(String.format("Rank[%d] Total Memory %f MB, Max Memory %f MB", world_rank,
 //                ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB));
         params = optArgs.getParams();
         ResourceManager resourceManager = new ResourceManager(params, world_rank, world_size);
-        double dataLoadingTime = 0.0;
+        long dataLoadingTime = (long) 0.0;
         t1 = System.nanoTime();
         DataSet dataSet = resourceManager.distributedLoad();
         MPI.COMM_WORLD.barrier();
@@ -147,11 +160,11 @@ public class Program {
         double[][] X = dataSet.getXtrain();
         //Matrix.printMatrix(X);
         double[] y = dataSet.getYtrain();
-        /*if (world_rank == 0) {
+        if (world_rank == 0) {
             LOG.info(String.format("Data Loading Completed, X[%d,%d], y[%d]", X.length, X[0].length, y.length));
-        }*/
+        }
         dataLoadingTime = System.nanoTime() - t1;
-        double trainingTime = 0.0;
+        long trainingTime = (long) 0.0;
        /* if (world_rank == 0) {
             LOG.info(String.format("Training Started"));
         }*/
@@ -166,16 +179,26 @@ public class Program {
         MPI.COMM_WORLD.barrier();
         double t3 = MPI.wtime();
         double trainingTimeWT = t3 - t2;
+        double commTime = pegasosSGD.communicationTime;
+        double compTime = trainingTimeWT - commTime;
         trainingTime = System.nanoTime() - t1;
         trainingTime /= N2S;
         dataLoadingTime /= N2S;
-        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => " +
-                        "Data Loading Time %f , Training Time : %f ", world_rank, y.length,
-                ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
-                dataLoadingTime, trainingTime));
-        System.out.println(String.format("Sys Time : %f, WTime : %f \n", trainingTime, trainingTimeWT));
+        double trainingTimeD = (double) trainingTime;
+        double dataLoadingTimeD = (double) dataLoadingTime;
+//        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => " +
+//                        "Data Loading Time %f , Training Time : %f ", world_rank, y.length,
+//                ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
+//                dataLoadingTimeD, trainingTimeD));
+        System.out.println(String.format("Sys Time : %f, WTime : %f \n", trainingTimeD, trainingTimeWT));
         if (world_rank == 0) {
-            Utils.logSave(params, trainingTime, dataLoadingTime);
+            LOG.info("Distributed SVM DEFAULT");
+            String s = "";
+            s += "Comm Time = " + commTime + "\n";
+            s += "Comp Time = " + compTime + "\n";
+            s += "Training Time = " + trainingTimeWT + "\n";
+            System.out.println(s);
+            Utils.logSave(params, trainingTimeWT, dataLoadingTime);
         }
         //System.gc();
         MPI.Finalize();
@@ -259,5 +282,15 @@ public class Program {
 //        Predict predict2 = new Predict(Xtest, ytest, wFinal);
 //        double acc2 = predict2.predict();
 //        System.out.println("Prediction Accuracy : " + acc2 + " %");
+    }
+
+    public static void openBlasBenchmark() {
+        //BlassUtils.run();
+        BlassUtils.withBlas();
+        try {
+            BlassUtils.withoutBlas();
+        } catch (MatrixMultiplicationException e) {
+            e.printStackTrace();
+        }
     }
 }

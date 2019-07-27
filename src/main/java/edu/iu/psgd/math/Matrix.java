@@ -109,6 +109,18 @@ public class Matrix {
         }
     }
 
+    public static double [] addR(double [] w1, double [] w2, double[] result) throws MatrixMultiplicationException {
+        if(w1.length == w2.length) {
+            for (int i = 0; i < w1.length; i++) {
+                result[i] = w1[i] + w2[i];
+            }
+            return result;
+        }else {
+            throw new MatrixMultiplicationException("Invalid Dimensions X.length "
+                    + w1.length + ", w.length : " + w2.length );
+        }
+    }
+
     public static double [] subtract(double [] w1, double [] w2) throws MatrixMultiplicationException {
         if(w1.length == w2.length) {
             double [] result = new double[w1.length];
