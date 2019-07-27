@@ -96,4 +96,9 @@ public class AdamPSGD extends SGD {
     public void sgdEnsemble() throws NullDataSetException, MatrixMultiplicationException {
 
     }
+
+    @Override
+    public void bSgd() throws NullDataSetException, MatrixMultiplicationException {
+
+    }
 }

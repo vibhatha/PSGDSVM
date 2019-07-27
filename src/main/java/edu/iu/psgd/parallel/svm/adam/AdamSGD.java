@@ -84,5 +84,10 @@ public class AdamSGD extends SGD {
 
     }
 
+    @Override
+    public void bSgd() throws NullDataSetException, MatrixMultiplicationException {
+
+    }
+
 
 }

@@ -56,6 +56,10 @@ public class Program {
             openBlasBenchmark();
         }
 
+        if(params.getSvmType() == SVMType.BLAS) {
+            blasDistributedSVM(args);
+        }
+
 
     }
 
@@ -175,6 +179,74 @@ public class Program {
         pegasosSGD.setWorld_size(world_size);
         pegasosSGD.setDoLog(false);
         pegasosSGD.sgd();
+        double[] w = pegasosSGD.getW();
+        MPI.COMM_WORLD.barrier();
+        double t3 = MPI.wtime();
+        double trainingTimeWT = t3 - t2;
+        double commTime = pegasosSGD.communicationTime;
+        double compTime = trainingTimeWT - commTime;
+        trainingTime = System.nanoTime() - t1;
+        trainingTime /= N2S;
+        dataLoadingTime /= N2S;
+        double trainingTimeD = (double) trainingTime;
+        double dataLoadingTimeD = (double) dataLoadingTime;
+//        LOG.info(String.format("Rank[%d][%d] Total Memory %f MB, Max Memory %f MB, Training Completed! => " +
+//                        "Data Loading Time %f , Training Time : %f ", world_rank, y.length,
+//                ((double) Runtime.getRuntime().totalMemory()) / B2MB, ((double) Runtime.getRuntime().maxMemory()) / B2MB,
+//                dataLoadingTimeD, trainingTimeD));
+        System.out.println(String.format("Sys Time : %f, WTime : %f \n", trainingTimeD, trainingTimeWT));
+        if (world_rank == 0) {
+            LOG.info("Distributed SVM DEFAULT");
+            String s = "";
+            s += "Comm Time = " + commTime + "\n";
+            s += "Comp Time = " + compTime + "\n";
+            s += "Training Time = " + trainingTimeWT + "\n";
+            System.out.println(s);
+            Utils.logSave(params, trainingTimeWT, dataLoadingTime);
+        }
+        //System.gc();
+        MPI.Finalize();
+
+    }
+
+    public static void blasDistributedSVM(String[] args) throws MPIException, ParseException, NullDataSetException, MatrixMultiplicationException, IOException {
+        MPI.Init(args);
+
+
+        long t1 = 0;
+        int world_rank = MPI.COMM_WORLD.getRank();
+        int world_size = MPI.COMM_WORLD.getSize();
+        if(world_rank == 0) {
+            LOG.info("Distributed SVM BLAS");
+        }
+
+//        LOG.info(String.format("Rank[%d] Total Memory %f MB, Max Memory %f MB", world_rank,
+//                ((double)Runtime.getRuntime().totalMemory())/B2MB, ((double)Runtime.getRuntime().maxMemory())/B2MB));
+        params = optArgs.getParams();
+        ResourceManager resourceManager = new ResourceManager(params, world_rank, world_size);
+        long dataLoadingTime = (long) 0.0;
+        t1 = System.nanoTime();
+        DataSet dataSet = resourceManager.distributedLoad();
+        MPI.COMM_WORLD.barrier();
+        //TODO :: off heap array definition
+        double[][] X = dataSet.getXtrain();
+        //Matrix.printMatrix(X);
+        double[] y = dataSet.getYtrain();
+        if (world_rank == 0) {
+            LOG.info(String.format("Data Loading Completed, X[%d,%d], y[%d]", X.length, X[0].length, y.length));
+        }
+        dataLoadingTime = System.nanoTime() - t1;
+        long trainingTime = (long) 0.0;
+       /* if (world_rank == 0) {
+            LOG.info(String.format("Training Started"));
+        }*/
+        double t2 = MPI.wtime();
+        t1 = System.nanoTime();
+        PegasosSGD pegasosSGD = new PegasosSGD(X, y, params.getAlpha(), params.getIterations());
+        pegasosSGD.setWorldRank(world_rank);
+        pegasosSGD.setWorld_size(world_size);
+        pegasosSGD.setDoLog(false);
+        pegasosSGD.bSgd();
         double[] w = pegasosSGD.getW();
         MPI.COMM_WORLD.barrier();
         double t3 = MPI.wtime();

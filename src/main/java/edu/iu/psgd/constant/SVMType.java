@@ -4,5 +4,6 @@ public enum SVMType {
     ENSEMBLE,
     DEFAULT,
     OTHER,
+    BLAS,
 
 }
