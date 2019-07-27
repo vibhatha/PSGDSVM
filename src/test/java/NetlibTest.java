@@ -56,7 +56,7 @@ public class NetlibTest {
     private Random r = new Random();
 
     private final int arrSize = 500;
-    private final int iterations  = 1000;
+    private final int iterations  = 200;
     private final int samples = 50000;
 
     public double[] randomArray(int size) {
