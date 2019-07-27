@@ -5,8 +5,10 @@ import edu.iu.psgd.exceptions.NullDataSetException;
 import edu.iu.psgd.math.Initializer;
 import edu.iu.psgd.math.Matrix;
 import edu.iu.psgd.parallel.SGD;
+import edu.iu.psgd.util.BlassUtils;
 import mpi.MPI;
 import mpi.MPIException;
+import com.github.fommil.netlib.BLAS;
 
 import java.util.logging.Logger;
 
@@ -49,7 +51,7 @@ public class PegasosSGD extends SGD {
         double condition = 1;
         // one time creation for Xyia and wa
         // represent X[][] => X1[] with offset (X1.length = X.length * X[0].length)
-        double[] Xyia = null;
+        double[] Xyia = new double[features];
         double[] wa;
         double[] globalW = Initializer.initZeros(features);
         double[] temp1 = new double[features];
@@ -60,6 +62,7 @@ public class PegasosSGD extends SGD {
         double[] temp6 = new double[features];
         globalW = new double[w.length];
         int count = 0;
+        BLAS b = BLAS.getInstance();
         for (int epoch = 0; epoch < iterations; epoch++) {
 //            if(epoch % 100 == 0 && worldRank == 0) {
 //                if(true) {
@@ -70,15 +73,28 @@ public class PegasosSGD extends SGD {
                 xi = X[i];
                 yi = y[i];
                 // TODO: Java AVX Support :D
-                condition = yi * Matrix.dot(xi, w);
-
+                //condition = yi * Matrix.dot(xi, w);
+                condition = b.ddot(features, xi, 1, w, 1 );
                 if (condition < 1) {
                     //TODO:  matrix mul library usage : pass output array from here
-                    Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp2), alpha, temp3);
-                    w = Matrix.subtractR(w, Xyia, temp4);
+                    /*
+                    * C++ Blass Corresponding
+                    cblas_daxpy(features, alpha * y[j], X[j], 1, xiyi, 1.0);
+                    cblas_daxpy(features, alpha , xiyi, 1, w, 1.0);*/
+
+                    b.daxpy(features, alpha * yi, xi, 1, Xyia, 1);
+                    b.daxpy(features,  alpha,  Xyia, 1, w, 1);
+                    //Xyia = Matrix.scalarMultiplyR(Matrix.subtractR(w, Matrix.scalarMultiplyR(xi, yi, temp1), temp2), alpha, temp3);
+
+                    //w = Matrix.subtractR(w, Xyia, temp4);
                 } else {
-                    wa = Matrix.scalarMultiplyR(w, alpha, temp5);
-                    w = Matrix.subtractR(w, wa, temp6);
+                    /*
+                    * C++ Blass Corresponding
+                    * cblas_daxpy(features, alpha , w, 1, w, 1.0);
+                    * */
+                   b.daxpy(features, alpha, w, 1, w, 1);
+                    //wa = Matrix.scalarMultiplyR(w, alpha, temp5);
+                    //w = Matrix.subtractR(w, wa, temp6);
                 }
                 count++;
             }
