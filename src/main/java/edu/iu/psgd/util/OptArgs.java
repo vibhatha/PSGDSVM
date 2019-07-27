@@ -77,6 +77,9 @@ public class OptArgs {
         if(s.equalsIgnoreCase(String.valueOf(SVMType.OTHER))) {
             return SVMType.OTHER;
         }
+        if(s.equalsIgnoreCase(String.valueOf(SVMType.BLAS))) {
+            return SVMType.BLAS;
+        }
         return SVMType.DEFAULT;
     }
 }
